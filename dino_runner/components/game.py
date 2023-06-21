@@ -21,6 +21,7 @@ class Game:
         self.y_pos_bg = 380
         self.score = 0
         self.death_count = 0
+        self.font_style = FONT_STYLE
 
         self.player = Dinosaur()
         self.obstacle_manager = ObstacleManager()
@@ -37,6 +38,8 @@ class Game:
     def run(self):
         # Game loop: events - update - draw
         self.playing = True
+        self.score = 0
+        self.game_speed = 20
         self.obstacle_manager.reset_obstacles()
         while self.playing:
             self.events()
@@ -93,20 +96,30 @@ class Game:
             elif event.type == pygame.KEYDOWN:
                 self.run()
 
+    def render_text(self,font_style, text, size=22, color=(0, 0, 0), x=0 , y=0):
+        font = pygame.font.Font(font_style, size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.center = (x , y)
+        self.screen.blit(text_surface, text_rect)
+
     def show_menu(self):
         self.screen.fill((255,255,255))
         half_screen_height = SCREEN_HEIGHT // 2
         half_screen_width = SCREEN_WIDTH // 2
-
+       
         if self.death_count == 0:
-            font = pygame.font.Font(FONT_STYLE, 22)
-            text = font.render("Press any key to start", True, (0,0,0))
-            text_rect = text.get_rect()
-            text_rect.center = (half_screen_width, half_screen_height)
-            self.screen.blit(text, text_rect)
+            text_start = "Press any key to start"
+            self.render_text(self.font_style, text_start, x = half_screen_width, y = half_screen_height)
         else:
             self.screen.blit(ICON, (half_screen_width - 20, half_screen_height - 140))
-
+            text_restart = "Press any key to Restart"
+            text_score = "Score: {}".format(self.score)
+            text_death_count = "Death Count: {}".format(self.death_count)
+            self.render_text(self.font_style, text_restart, x = half_screen_width, y = half_screen_height)
+            self.render_text(self.font_style, text_score, x = half_screen_width, y = half_screen_height + 40)
+            self.render_text(self.font_style, text_death_count, x=half_screen_width, y=half_screen_height + 80)
+           
         pygame.display.flip()
 
         self.handle_events_on_menu()
