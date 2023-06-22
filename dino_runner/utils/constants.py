@@ -21,8 +21,8 @@ RUNNING_SHIELD = [
     pygame.image.load(os.path.join(IMG_DIR, "Dino/DinoRun2.png")),
 ]
 
-RUNNING_HAMMER = [
-    pygame.image.load(os.path.join(IMG_DIR, "Dino/DinoDuck1Hammer.png")),
+RUNNING_HAMMER = [ 
+    pygame.image.load(os.path.join(IMG_DIR, "Dino/DinoRun1Hammer.png")),
     pygame.image.load(os.path.join(IMG_DIR, "Dino/DinoRun2.png")),
 ]
 
@@ -50,6 +50,7 @@ SMALL_CACTUS = [
     pygame.image.load(os.path.join(IMG_DIR, "Cactus/SmallCactus2.png")),
     pygame.image.load(os.path.join(IMG_DIR, "Cactus/SmallCactus3.png")),
 ]
+
 LARGE_CACTUS = [
     pygame.image.load(os.path.join(IMG_DIR, "Cactus/LargeCactus1.png")),
     pygame.image.load(os.path.join(IMG_DIR, "Cactus/LargeCactus2.png")),
@@ -69,5 +70,15 @@ BG = pygame.image.load(os.path.join(IMG_DIR, 'Other/Track.png'))
 
 HEART = pygame.image.load(os.path.join(IMG_DIR, 'Other/SmallHeart.png'))
 
+RESET = pygame.image.load(os.path.join(IMG_DIR, 'Other/restart.png'))
+RESET = pygame.transform.scale(RESET, (300  , 101))
+
+PLAY = pygame.image.load(os.path.join(IMG_DIR, 'Other/start.png'))
+PLAY = pygame.transform.scale(PLAY, (300 , 101))
+
+SCORE = pygame.image.load(os.path.join(IMG_DIR, 'Other/score.png'))
+SCORE = pygame.transform.scale(SCORE, (100, 30))
+
 DEFAULT_TYPE = "default"
 SHIELD_TYPE = "shield"
+HAMMER_TYPE = "hammer"

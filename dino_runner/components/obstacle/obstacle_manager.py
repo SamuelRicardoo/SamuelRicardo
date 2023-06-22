@@ -3,7 +3,8 @@ import random
 
 from dino_runner.components.obstacle.cactus import Cactus
 from dino_runner.components.obstacle.bird import Bird
-from dino_runner.utils.constants import SMALL_CACTUS, LARGE_CACTUS, BIRD
+from dino_runner.utils.constants import SMALL_CACTUS, LARGE_CACTUS, BIRD,HAMMER_TYPE,DEFAULT_TYPE
+from dino_runner.utils.constants_sound import COLISON_SOUND
 
 
 class ObstacleManager:
@@ -23,14 +24,18 @@ class ObstacleManager:
         for obstacle in self.obstacles:
             obstacle.update(game.game_speed, self.obstacles)
             if game.player.dino_rect.colliderect(obstacle.rect):
-                if not game.player.has_power_up:
+                if not game.player.has_power_up and game.life == 0:
+                    COLISON_SOUND.play() #som de colisção adicionado
                     pygame.time.delay(500)
                     game.playing = False
                     game.death_count +=1
                     break
-                else:
+                elif game.player.type == DEFAULT_TYPE:
+                    game.life -= 1
                     self.obstacles.remove(obstacle)
-
+                elif game.player.type == HAMMER_TYPE: #condição para remover obstaculo com o hammer
+                    self.obstacles.remove(obstacle)
+                    
     def reset_obstacles(self):
         self.obstacles = []
 

@@ -1,6 +1,7 @@
 import pygame
 
-from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DEFAULT_TYPE
+from dino_runner.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DEFAULT_TYPE, RESET, PLAY, SCORE
+from dino_runner.utils.constants_sound import SCORE_SOUND,RESET_SOUND,START_SOUND
 from dino_runner.components.dinosaur import Dinosaur
 from dino_runner.components.obstacle.obstacle_manager import ObstacleManager
 from dino_runner.components.power_ups.power_up_manager import PowerUpManager
@@ -22,7 +23,9 @@ class Game:
         self.y_pos_bg = 380
         self.score = 0
         self.death_count = 0
+        self.life = 1
         self.font_style = FONT_STYLE
+        self.sound_played = False
 
         self.player = Dinosaur()
         self.obstacle_manager = ObstacleManager()
@@ -34,21 +37,34 @@ class Game:
         text_rect = text_surface.get_rect()
         text_rect.center = (x , y)
         self.screen.blit(text_surface, text_rect)
+    
+    def play_sound(self):
+        if not self.sound_played: 
+            if self.death_count == 0:   
+                START_SOUND.play()
+            else:
+                RESET_SOUND.play() 
+            self.sound_played = True
+
+    def restart_game(self): 
+        self.score = 0
+        self.sound_played = False
+        self.game_speed = 20
+        self.life = 1
 
     def execute(self):
         self.running = True
         while self.running:
             if not self.playing:
                 self.show_menu()
-
+                
         pygame.display.quit()
         pygame.quit()
 
     def run(self):
         # Game loop: events - update - draw
         self.playing = True
-        self.score = 0
-        self.game_speed = 20
+        self.restart_game()
         self.obstacle_manager.reset_obstacles()
         self.power_up_manager.reset_power_ups()
         while self.playing:
@@ -60,6 +76,7 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.playing = False
+                self.running = False
 
     def update(self):
         user_input = pygame.key.get_pressed()
@@ -71,17 +88,19 @@ class Game:
     def update_score(self):
         self.score += 1
         if self.score % 100 == 0:
+            SCORE_SOUND.play()
             self.game_speed += 5
         
     def draw(self):
         self.clock.tick(FPS)
-        self.screen.fill((255, 255, 255))
+        self.screen.fill((0, 255, 255))
         self.draw_background()
         self.draw_score()
         self.player.draw(self.screen)
         self.obstacle_manager.draw(self.screen)
         self.power_up_manager.draw(self.screen)
         self.draw_power_up_time()
+        self.draw_life()
         pygame.display.update()
         pygame.display.flip()
 
@@ -95,11 +114,16 @@ class Game:
         self.x_pos_bg -= self.game_speed
 
     def draw_score(self):
-        font = pygame.font.Font(FONT_STYLE, 22)
-        text = font.render("score:{}".format(self.score), True, (0,0,0))
-        text_rect = text.get_rect()
-        text_rect.center = (1000, 50)
-        self.screen.blit(text, text_rect)
+        score_text = f"      {self.score}"
+        x = 1000
+        y = 50
+        self.render_text(self.font_style, score_text,x = x+10 , y = y+1)
+        self.screen.blit(SCORE, (x- SCORE.get_width(),y - SCORE.get_height() // 2))
+
+    def draw_life(self):
+        text_life = "Life: {}".format(self.life)
+        self.render_text(self.font_style, text_life, x = 50, y = 51)
+
 
     def draw_power_up_time(self):
         if self.player.has_power_up:
@@ -109,31 +133,46 @@ class Game:
             else:
                 self.player.has_power_up = False
                 self.player.type = DEFAULT_TYPE
-
+                
     def handle_events_on_menu(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.playing == False
+                self.playing = False
                 self.running = False
-            elif event.type == pygame.KEYDOWN:
-                self.run()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if self.check_button_click(mouse_pos):
+                    self.run()
+
+    def check_button_click(self, mouse_pos):   
+        button_width = RESET.get_width()
+        button_height = RESET.get_height()
+        button_x = SCREEN_WIDTH // 2 - button_width // 2
+        button_y = SCREEN_HEIGHT // 2 - button_height // 2
+        if button_x <= mouse_pos[0] <= button_x + button_width and button_y <= mouse_pos[1] <= button_y + button_height:
+            return True   
+        return False
 
     def show_menu(self):
-        self.screen.fill((255,255,255))
+        self.screen.fill((0,255,255))
         half_screen_height = SCREEN_HEIGHT // 2
         half_screen_width = SCREEN_WIDTH // 2
-       
+        x_reset = half_screen_width - RESET.get_width() // 2
+        y_reset = half_screen_height - RESET.get_height() // 2
+
         if self.death_count == 0:
-            text_start = "Press any key to start"
-            self.render_text(self.font_style, text_start, x = half_screen_width, y = half_screen_height)
+            self.screen.blit(PLAY, (x_reset, y_reset))
+            text_start = "Press to start"
+            self.render_text(self.font_style, text_start, x = half_screen_width, y = half_screen_height+100)
+            self.play_sound()
         else:
-            self.screen.blit(ICON, (half_screen_width - 20, half_screen_height - 140))
-            text_restart = "Press any key to Restart"
-            text_score = "Score: {}".format(self.score)
+            self.screen.blit(RESET, (x_reset, y_reset))
+            text_restart = "Press to Restart"
             text_death_count = "Death Count: {}".format(self.death_count)
-            self.render_text(self.font_style, text_restart, x = half_screen_width, y = half_screen_height)
-            self.render_text(self.font_style, text_score, x = half_screen_width, y = half_screen_height + 40)
-            self.render_text(self.font_style, text_death_count, x=half_screen_width, y=half_screen_height + 80)
+            self.render_text(self.font_style, text_restart, x=half_screen_width, y=y_reset + RESET.get_height() + 5)
+            self.render_text(self.font_style, text_death_count, x=half_screen_width, y=y_reset + RESET.get_height() + 35)
+            self.draw_score()
+            self.play_sound()
            
         pygame.display.flip()
 
