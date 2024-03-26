@@ -33,7 +33,7 @@ class ObstacleManager:
                 elif game.player.type == DEFAULT_TYPE:
                     game.life -= 1
                     self.obstacles.remove(obstacle)
-                elif game.player.type == HAMMER_TYPE: #condição para remover obstaculo com o hammer
+                elif game.player.type == HAMMER_TYPE: 
                     self.obstacles.remove(obstacle)
                     
     def reset_obstacles(self):
